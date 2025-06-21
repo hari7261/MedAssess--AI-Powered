@@ -1,0 +1,13 @@
+{
+    "about": "Excel Engineering College is a premier institution...",
+    "courses": ["B.Tech in CSE", "B.Tech in ECE", "M.Tech in Data Science"],
+    "admissionProcess": "Admissions are based on JEE Main scores...",
+    "facilities": ["24/7 Library", "Advanced Labs", "Hostels", "Sports Complex"],
+    "placementStats": "90% placement rate with top companies...",
+    "events": ["Tech Fest 2023", "Cultural Fest 2023"],
+    "contact": {
+      "email": "info@excel.edu",
+      "phone": "+91 1234567890",
+      "address": "123 College Road, City, State, PIN"
+    }
+  }
