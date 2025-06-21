@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Medical theme custom animations */
+@keyframes pulse-heal {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
+.animate-heal {
+  animation: pulse-heal 2s ease-in-out infinite;
+}
+
+/* Custom scrollbar for medical theme */
+.scrollbar-medical {
+  scrollbar-width: thin;
+  scrollbar-color: #22c55e #f0fdf4;
+}
+
+.scrollbar-medical::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-medical::-webkit-scrollbar-track {
+  background: #f0fdf4;
+  border-radius: 4px;
+}
+
+.scrollbar-medical::-webkit-scrollbar-thumb {
+  background: #22c55e;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.scrollbar-medical::-webkit-scrollbar-thumb:hover {
+  background: #16a34a;
+}
+
+/* Medical theme gradients */
+.medical-gradient {
+  background: linear-gradient(135deg, #dcfce7 0%, #e0f2fe 100%);
+}
+
+/* Add smooth scrolling to all elements */
+* {
+  scroll-behavior: smooth;
+}
