@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedAssess Project UML Diagram</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+            overflow: hidden; /* Prevent unwanted scrolling */
+        }
+        .container {
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: #0066cc;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+        .control-btn {
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 18px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background 0.3s;
+        }
+        .control-btn:hover {
+            background: #004d99;
+        }
+        .canvas-container {
+            overflow: hidden;
+            border: 1px solid #ddd;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin: 0 auto;
+            position: relative;
+            height: calc(100vh - 100px); /* Adjusted height */
+            width: 100%;
+        }
+        canvas {
+            display: block;
+        }
+        .legend, .description {
+            padding: 15px;
+            background: white;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+        }
+        .color-frontend { background-color: #4e73df; }
+        .color-auth { background-color: #e74a3b; }
+        .color-health { background-color: #1cc88a; }
+        .color-providers { background-color: #f6c23e; }
+        .color-ai { background-color: #36b9cc; }
+        .color-resources { background-color: #6f42c1; }
+        .color-services { background-color: #fd7e14; }
+        .color-security { background-color: #5a5c69; }
+
+        /* New styles for enhanced visualization */
+        .top-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .feature-btn {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background 0.3s;
+        }
+        
+        .feature-btn:hover {
+            background: #004d99;
+        }
+        
+        .search-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+            font-size: 14px;
+        }
+        
+        .tooltip {
+            position: absolute;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 1000;
+            max-width: 250px;
+            pointer-events: none;
+            display: none;
+        }
+        
+        .minimap-container {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 200px;
+            height: 150px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        #minimapCanvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .viewport-indicator {
+            position: absolute;
+            border: 2px solid #ff0000;
+            pointer-events: none;
+        }
+
+        /* Fullscreen styles */
+        .fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9000;
+            background: white;
+        }
+
+        /* Toggle switches for component groups */
+        .toggle-controls {
+            position: fixed;
+            top: 70px;
+            left: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .toggle-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .toggle-switch {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>MedAssess Project - UML Diagram</h1>
+        
+        <div class="search-container">
+            <input type="text" class="search-input" id="search-input" placeholder="Search components...">
+        </div>
+        
+        <div class="top-controls">
+            <button class="feature-btn" id="export-btn">Export as PNG</button>
+            <button class="feature-btn" id="fullscreen-btn">Fullscreen</button>
+        </div>
+        
+        <div class="toggle-controls" id="toggle-controls">
+            <h4>Toggle Components</h4>
+            <!-- Component toggles will be added dynamically -->
+        </div>
+        
+        <div class="canvas-container" id="canvas-container">
+            <canvas id="umlCanvas"></canvas>
+            <div class="tooltip" id="tooltip"></div>
+        </div>
+        
+        <div class="minimap-container" id="minimap-container">
+            <canvas id="minimapCanvas"></canvas>
+            <div class="viewport-indicator" id="viewport-indicator"></div>
+        </div>
+        
+        <div class="controls">
+            <button class="control-btn" id="zoom-in">+</button>
+            <button class="control-btn" id="zoom-out">-</button>
+            <button class="control-btn" id="reset">↺</button>
+        </div>
+        <div class="legend">
+            <h3>Legend</h3>
+            <div class="legend-item"><div class="legend-color color-frontend"></div><div>Frontend Framework</div></div>
+            <div class="legend-item"><div class="legend-color color-auth"></div><div>Authentication System</div></div>
+            <div class="legend-item"><div class="legend-color color-health"></div><div>Health Assessment Tools</div></div>
+            <div class="legend-item"><div class="legend-color color-providers"></div><div>Healthcare Provider Connections</div></div>
+            <div class="legend-item"><div class="legend-color color-ai"></div><div>AI and Communication Tools</div></div>
+            <div class="legend-item"><div class="legend-color color-resources"></div><div>Health Information Resources</div></div>
+            <div class="legend-item"><div class="legend-color color-services"></div><div>Government and Financial Services</div></div>
+            <div class="legend-item"><div class="legend-color color-security"></div><div>Security Implementations</div></div>
+        </div>
+        <div class="description">
+            <h3>About This UML Diagram</h3>
+            <p>This interactive UML diagram represents the MedAssess healthcare platform architecture. Use the controls to zoom in (+), zoom out (-), or reset (↺) the view.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('umlCanvas');
+            const ctx = canvas.getContext('2d');
+            const container = document.getElementById('canvas-container');
+            const minimapCanvas = document.getElementById('minimapCanvas');
+            const minimapCtx = minimapCanvas.getContext('2d');
+            const viewportIndicator = document.getElementById('viewport-indicator');
+            const tooltip = document.getElementById('tooltip');
+            const searchInput = document.getElementById('search-input');
+            const toggleControls = document.getElementById('toggle-controls');
+            
+            // Enhanced variables for visualization
+            let scale = 0.8;
+            let offsetX = 0;
+            let offsetY = 0;
+            let isDragging = false;
+            let lastX, lastY;
+            let hoveredComponent = null;
+            const minScale = 0.2;
+            const maxScale = 5;
+            let showMinimap = true;
+            let animationFrameId = null;
+            
+            // Component visibility settings
+            const componentGroups = {
+                'Frontend': { color: '#4e73df', visible: true },
+                'Authentication': { color: '#e74a3b', visible: true },
+                'Health': { color: '#1cc88a', visible: true },
+                'Providers': { color: '#f6c23e', visible: true },
+                'AI': { color: '#36b9cc', visible: true },
+                'Resources': { color: '#6f42c1', visible: true },
+                'Services': { color: '#fd7e14', visible: true },
+                'Security': { color: '#5a5c69', visible: true }
+            };
+            
+            // Set canvas size dynamically
+            function resizeCanvas() {
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+                minimapCanvas.width = 200;
+                minimapCanvas.height = 150;
+                requestAnimationFrame(draw);
+            }
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Create toggle controls for component groups
+            function createToggleControls() {
+                Object.entries(componentGroups).forEach(([group, props]) => {
+                    const toggleItem = document.createElement('div');
+                    toggleItem.className = 'toggle-item';
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.className = 'toggle-switch';
+                    checkbox.checked = props.visible;
+                    checkbox.addEventListener('change', (e) => {
+                        componentGroups[group].visible = e.target.checked;
+                        requestAnimationFrame(draw);
+                    });
+                    
+                    const label = document.createElement('label');
+                    label.textContent = group;
+                    
+                    toggleItem.appendChild(checkbox);
+                    toggleItem.appendChild(label);
+                    toggleControls.appendChild(toggleItem);
+                });
+            }
+            
+            createToggleControls();
+            
+            // Enhanced zoom controls with mouse wheel support
+            document.getElementById('zoom-in').addEventListener('click', () => {
+                if (scale < maxScale) {
+                    scale *= 1.2;
+                    requestAnimationFrame(draw);
+                }
+            });
+            
+            document.getElementById('zoom-out').addEventListener('click', () => {
+                if (scale > minScale) {
+                    scale /= 1.2;
+                    requestAnimationFrame(draw);
+                }
+            });
+            
+            document.getElementById('reset').addEventListener('click', () => {
+                scale = 0.8;
+                offsetX = 0;
+                offsetY = 0;
+                requestAnimationFrame(draw);
+            });
+            
+            // Mouse wheel zoom
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                
+                // Calculate mouse position relative to the canvas with current scale and offset
+                const oldWorldX = (mouseX - canvas.width / 2) / scale - offsetX;
+                const oldWorldY = (mouseY - canvas.height / 2) / scale - offsetY;
+                
+                // Adjust scale
+                if (e.deltaY < 0 && scale < maxScale) {
+                    scale *= 1.1;
+                } else if (e.deltaY > 0 && scale > minScale) {
+                    scale /= 1.1;
+                }
+                
+                // Calculate new world position
+                const newWorldX = (mouseX - canvas.width / 2) / scale - offsetX;
+                const newWorldY = (mouseY - canvas.height / 2) / scale - offsetY;
+                
+                // Adjust offset to keep the mouse point in the same position
+                offsetX += newWorldX - oldWorldX;
+                offsetY += newWorldY - oldWorldY;
+                
+                requestAnimationFrame(draw);
+            });
+            
+            // Enhanced dragging functionality with touch support
+            canvas.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                lastX = e.clientX;
+                lastY = e.clientY;
+                canvas.style.cursor = 'grabbing';
+            });
+            
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                
+                // Check for hovered component
+                const worldX = (mouseX - canvas.width / 2) / scale + offsetX * scale;
+                const worldY = (mouseY - canvas.height / 2) / scale + offsetY * scale;
+                
+                hoveredComponent = findComponentAt(worldX, worldY);
+                
+                if (hoveredComponent) {
+                    canvas.style.cursor = 'pointer';
+                    showTooltip(hoveredComponent, e.clientX, e.clientY);
+                } else {
+                    if (!isDragging) canvas.style.cursor = 'grab';
+                    hideTooltip();
+                }
+                
+                if (isDragging) {
+                    offsetX += (e.clientX - lastX) / scale;
+                    offsetY += (e.clientY - lastY) / scale;
+                    lastX = e.clientX;
+                    lastY = e.clientY;
+                    requestAnimationFrame(draw);
+                }
+            });
+            
+            // Component search functionality
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                if (searchTerm) {
+                    const foundComponent = components.find(comp => 
+                        comp.name.toLowerCase().includes(searchTerm) || 
+                        comp.description.toLowerCase().includes(searchTerm));
+                    
+                    if (foundComponent) {
+                        // Center on the found component
+                        offsetX = -foundComponent.x - foundComponent.width / 2;
+                        offsetY = -foundComponent.y - foundComponent.height / 2;
+                        scale = 1.2; // Zoom to a good level to see the component
+                        highlightComponent(foundComponent);
+                        requestAnimationFrame(draw);
+                    }
+                }
+            });
+            
+            // Double click to zoom to component
+            canvas.addEventListener('dblclick', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                
+                const worldX = (mouseX - canvas.width / 2) / scale + offsetX * scale;
+                const worldY = (mouseY - canvas.height / 2) / scale + offsetY * scale;
+                
+                const clickedComponent = findComponentAt(worldX, worldY);
+                if (clickedComponent) {
+                    // Center on the component
+                    offsetX = -clickedComponent.x - clickedComponent.width / 2;
+                    offsetY = -clickedComponent.y - clickedComponent.height / 2;
+                    scale = Math.min(1.5, maxScale);
+                    requestAnimationFrame(draw);
+                }
+            });
+            
+            // Export functionality
+            document.getElementById('export-btn').addEventListener('click', () => {
+                // Create a temporary canvas to draw the entire diagram
+                const tempCanvas = document.createElement('canvas');
+                const diagramWidth = 1200;
+                const diagramHeight = 1000;
+                tempCanvas.width = diagramWidth;
+                tempCanvas.height = diagramHeight;
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // Draw white background
+                tempCtx.fillStyle = 'white';
+                tempCtx.fillRect(0, 0, diagramWidth, diagramHeight);
+                
+                // Draw diagram centered on the canvas
+                tempCtx.save();
+                tempCtx.translate(diagramWidth / 2, diagramHeight / 2);
+                tempCtx.scale(0.8, 0.8); // Use a fixed scale for export
+                
+                renderDiagram(tempCtx, false); // Draw without effects for cleaner export
+                
+                tempCtx.restore();
+                
+                // Create download link
+                const link = document.createElement('a');
+                link.download = 'MedAssess-UML-Diagram.png';
+                link.href = tempCanvas.toDataURL('image/png');
+                link.click();
+            });
+            
+            // Fullscreen functionality
+            document.getElementById('fullscreen-btn').addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    container.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            });
+            
+            document.addEventListener('fullscreenchange', () => {
+                if (document.fullscreenElement) {
+                    container.classList.add('fullscreen');
+                } else {
+                    container.classList.remove('fullscreen');
+                }
+                resizeCanvas();
+            });
+            
+            canvas.addEventListener('mouseup', () => {
+                isDragging = false;
+                canvas.style.cursor = hoveredComponent ? 'pointer' : 'grab';
+            });
+            
+            canvas.addEventListener('mouseleave', () => {
+                isDragging = false;
+                canvas.style.cursor = 'grab';
+                hideTooltip();
+            });
+            
+            // Find component at given coordinates
+            function findComponentAt(x, y) {
+                // Adjust coordinates based on diagram center position
+                const diagramWidth = 1200;
+                const diagramHeight = 1000;
+                x = x + diagramWidth / 2;
+                y = y + diagramHeight / 2;
+                
+                // Check if inside any component
+                return components.find(comp => {
+                    if (!isComponentVisible(comp)) return false;
+                    
+                    return (
+                        x >= comp.x && 
+                        x <= comp.x + comp.width && 
+                        y >= comp.y && 
+                        y <= comp.y + comp.height
+                    );
+                });
+            }
+            
+            // Show tooltip with component info
+            function showTooltip(component, mouseX, mouseY) {
+                tooltip.style.display = 'block';
+                tooltip.style.left = `${mouseX + 15}px`;
+                tooltip.style.top = `${mouseY + 15}px`;
+                
+                // Build tooltip content
+                let content = `<strong>${component.name}</strong><br>`;
+                content += `Type: ${getComponentType(component)}<br>`;
+                content += `Description: ${component.description}<br>`;
+                
+                if (component.children) {
+                    content += `<br><strong>Related Components:</strong><br>`;
+                    component.children.forEach(childId => {
+                        const child = components.find(c => c.id === childId);
+                        if (child) {
+                            content += `- ${child.name}<br>`;
+                        }
+                    });
+                }
+                
+                tooltip.innerHTML = content;
+            }
+            
+            // Hide tooltip
+            function hideTooltip() {
+                tooltip.style.display = 'none';
+            }
+            
+            // Get component type based on color
+            function getComponentType(component) {
+                switch(component.color) {
+                    case '#4e73df': return 'Frontend Framework';
+                    case '#e74a3b': return 'Authentication System';
+                    case '#1cc88a': return 'Health Assessment Tools';
+                    case '#f6c23e': return 'Healthcare Provider Connections';
+                    case '#36b9cc': return 'AI and Communication Tools';
+                    case '#6f42c1': return 'Health Information Resources';
+                    case '#fd7e14': return 'Government and Financial Services';
+                    case '#5a5c69': return 'Security Implementations';
+                    default: return 'Unknown';
+                }
+            }
+            
+            // Check if component should be visible based on its group
+            function isComponentVisible(component) {
+                const type = getComponentType(component);
+                for (const [group, props] of Object.entries(componentGroups)) {
+                    if (type.includes(group) && !props.visible) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            
+            // Highlight a component temporarily
+            let highlightedComponent = null;
+            let highlightTimeout = null;
+            
+            function highlightComponent(component) {
+                highlightedComponent = component;
+                clearTimeout(highlightTimeout);
+                highlightTimeout = setTimeout(() => {
+                    highlightedComponent = null;
+                    requestAnimationFrame(draw);
+                }, 2000);
+            }
+
+            // UML Components and connections (existing data)
+            const components = [
+                { id: 'frontend', name: 'Frontend Framework', x: 500, y: 50, width: 180, height: 80, color: '#4e73df', description: 'React with TypeScript', children: ['routing', 'dataFetching', 'uiComponents'] },
+                { id: 'routing', name: 'Routing', x: 300, y: 150, width: 150, height: 60, color: '#4e73df', description: 'React Router DOM' },
+                { id: 'dataFetching', name: 'Data Fetching', x: 500, y: 150, width: 150, height: 60, color: '#4e73df', description: 'React Query' },
+                { id: 'uiComponents', name: 'UI Components', x: 700, y: 150, width: 150, height: 60, color: '#4e73df', description: 'Custom Components' },
+                { id: 'auth', name: 'Authentication System', x: 500, y: 250, width: 180, height: 80, color: '#e74a3b', description: 'Protected Routes', children: ['login', 'registration'] },
+                { id: 'login', name: 'Login System', x: 400, y: 350, width: 150, height: 60, color: '#e74a3b', description: '/login' },
+                { id: 'registration', name: 'User Registration', x: 600, y: 350, width: 150, height: 60, color: '#e74a3b', description: 'New Users' },
+                { id: 'healthAssessment', name: 'Health Assessment Tools', x: 200, y: 450, width: 200, height: 80, color: '#1cc88a', description: 'Disease Assessments', children: ['chronicAssessment', 'infectiousAssessment'] },
+                { id: 'chronicAssessment', name: 'Chronic Disease', x: 100, y: 550, width: 150, height: 60, color: '#1cc88a', description: 'Cancer, Diabetes' },
+                { id: 'infectiousAssessment', name: 'Infectious Disease', x: 300, y: 550, width: 150, height: 60, color: '#1cc88a', description: 'Malaria, COVID-19' },
+                { id: 'providers', name: 'Healthcare Providers', x: 500, y: 450, width: 180, height: 80, color: '#f6c23e', description: 'Directory & Access', children: ['doctors', 'hospitals', 'appointments'] },
+                { id: 'doctors', name: 'Doctor Directory', x: 400, y: 550, width: 150, height: 60, color: '#f6c23e', description: '/doctors' },
+                { id: 'hospitals', name: 'Hospital Directory', x: 600, y: 550, width: 150, height: 60, color: '#f6c23e', description: '/hospitals' },
+                { id: 'appointments', name: 'Appointments', x: 500, y: 650, width: 150, height: 60, color: '#f6c23e', description: '/appointments' },
+                { id: 'aiTools', name: 'AI & Communication', x: 800, y: 450, width: 200, height: 80, color: '#36b9cc', description: 'AI Assistants', children: ['generalAI', 'advancedGPT', 'chatbot'] },
+                { id: 'generalAI', name: 'General AI Chat', x: 700, y: 550, width: 150, height: 60, color: '#36b9cc', description: '/ChatWithAI' },
+                { id: 'advancedGPT', name: 'Advanced GPT', x: 900, y: 550, width: 150, height: 60, color: '#36b9cc', description: '/AdvancedGPT' },
+                { id: 'chatbot', name: 'Integrated Chatbot', x: 800, y: 650, width: 150, height: 60, color: '#36b9cc', description: 'Chatbase.co' },
+                { id: 'resources', name: 'Health Information', x: 200, y: 750, width: 180, height: 80, color: '#6f42c1', description: 'Medical Resources', children: ['diseaseInfo', 'faq'] },
+                { id: 'diseaseInfo', name: 'Disease Info', x: 100, y: 850, width: 150, height: 60, color: '#6f42c1', description: '/disease-info' },
+                { id: 'faq', name: 'FAQ Section', x: 300, y: 850, width: 150, height: 60, color: '#6f42c1', description: '/faq' },
+                { id: 'govServices', name: 'Gov & Financial', x: 500, y: 750, width: 200, height: 80, color: '#fd7e14', description: 'Services', children: ['govtSchemes', 'insurance'] },
+                { id: 'govtSchemes', name: 'Gov Schemes', x: 400, y: 850, width: 150, height: 60, color: '#fd7e14', description: '/GovtHealthSchemes' },
+                { id: 'insurance', name: 'Insurance', x: 600, y: 850, width: 150, height: 60, color: '#fd7e14', description: '/insurance' },
+                { id: 'security', name: 'Security', x: 800, y: 750, width: 200, height: 80, color: '#5a5c69', description: 'Data Protection', children: ['routeProtection', 'dataPrivacy'] },
+                { id: 'routeProtection', name: 'Route Protection', x: 750, y: 850, width: 150, height: 60, color: '#5a5c69', description: 'Authentication' },
+                { id: 'dataPrivacy', name: 'Data Privacy', x: 950, y: 850, width: 150, height: 60, color: '#5a5c69', description: 'Encryption' }
+            ];
+
+            const connections = [
+                { from: 'frontend', to: 'auth' },
+                { from: 'auth', to: 'healthAssessment' },
+                { from: 'auth', to: 'providers' },
+                { from: 'auth', to: 'aiTools' },
+                { from: 'auth', to: 'resources' },
+                { from: 'auth', to: 'govServices' },
+                { from: 'security', to: 'auth', style: 'dashed' },
+                { from: 'security', to: 'providers', style: 'dashed' },
+                { from: 'security', to: 'aiTools', style: 'dashed' },
+                { from: 'security', to: 'govServices', style: 'dashed' }
+            ];
+
+            // Enhanced drawing functions
+            function drawRoundedRect(ctx, x, y, width, height, radius, color, isHighlighted = false) {
+                const gradient = ctx.createLinearGradient(x, y, x, y + height);
+                const baseColor = color;
+                const lighterColor = adjustColor(color, 20);
+                const darkerColor = adjustColor(color, -20);
+                
+                gradient.addColorStop(0, lighterColor);
+                gradient.addColorStop(1, darkerColor);
+                
+                ctx.beginPath();
+                ctx.moveTo(x + radius, y);
+                ctx.lineTo(x + width - radius, y);
+                ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+                ctx.lineTo(x + width, y + height - radius);
+                ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                ctx.lineTo(x + radius, y + height);
+                ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+                ctx.lineTo(x, y + radius);
+                ctx.quadraticCurveTo(x, y, x + radius, y);
+                ctx.closePath();
+                
+                // Shadow for 3D effect
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 10;
+                ctx.shadowOffsetX = 3;
+                ctx.shadowOffsetY = 3;
+                
+                // Fill with gradient
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                
+                // Reset shadow for the border
+                ctx.shadowColor = 'transparent';
+                
+                // Border
+                if (isHighlighted) {
+                    ctx.strokeStyle = '#ffff00';
+                    ctx.lineWidth = 3;
+                } else if (hoveredComponent && hoveredComponent.id === arguments[7]?.id) {
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 2;
+                } else {
+                    ctx.strokeStyle = '#333';
+                    ctx.lineWidth = 1;
+                }
+                ctx.stroke();
+            }
+            
+            // Adjust color brightness
+            function adjustColor(color, percent) {
+                const num = parseInt(color.slice(1), 16);
+                const r = Math.min(255, Math.max(0, (num >> 16) + percent));
+                const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + percent));
+                const b = Math.min(255, Math.max(0, (num & 0x0000FF) + percent));
+                return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, '0')}`;
+            }
+
+            function drawConnection(ctx, fromComp, toComp, style = 'solid') {
+                const startX = fromComp.x + fromComp.width / 2;
+                const startY = fromComp.y + fromComp.height;
+                const endX = toComp.x + toComp.width / 2;
+                const endY = toComp.y;
+                
+                // Add subtle path glow
+                ctx.shadowColor = 'rgba(100,100,255,0.3)';
+                ctx.shadowBlur = 5;
+                
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.bezierCurveTo(startX, (startY + endY) / 2, endX, (startY + endY) / 2, endX, endY);
+                ctx.setLineDash(style === 'dashed' ? [5, 3] : []);
+                ctx.strokeStyle = '#555';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                
+                // Reset shadow for the arrow
+                ctx.shadowColor = 'transparent';
+                
+                // Arrow code remains the same
+                const arrowSize = 8;
+                const angle = Math.atan2(endY - startY, endX - startX);
+                ctx.beginPath();
+                ctx.moveTo(endX, endY);
+                ctx.lineTo(endX - arrowSize * Math.cos(angle - Math.PI / 6), endY - arrowSize * Math.sin(angle - Math.PI / 6));
+                ctx.lineTo(endX - arrowSize * Math.cos(angle + Math.PI / 6), endY - arrowSize * Math.sin(angle + Math.PI / 6));
+                ctx.closePath();
+                ctx.fillStyle = '#555';
+                ctx.fill();
+                ctx.setLineDash([]);
+            }
+
+            function drawParentChildConnections(ctx) {
+                components.forEach(comp => {
+                    if (comp.children && isComponentVisible(comp)) {
+                        comp.children.forEach(childId => {
+                            const child = components.find(c => c.id === childId);
+                            if (child && isComponentVisible(child)) {
+                                const startX = comp.x + comp.width / 2;
+                                const startY = comp.y + comp.height;
+                                const endX = child.x + child.width / 2;
+                                const endY = child.y;
+                                
+                                ctx.beginPath();
+                                ctx.moveTo(startX, startY);
+                                
+                                // Create a curved line
+                                const controlPointY = (startY + endY) / 2;
+                                ctx.bezierCurveTo(startX, controlPointY, endX, controlPointY, endX, endY);
+                                
+                                ctx.strokeStyle = '#aaa';
+                                ctx.lineWidth = 1;
+                                ctx.stroke();
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Function to render the diagram (used for both main canvas and minimap)
+            function renderDiagram(context, withEffects = true) {
+                // Draw parent-child connections
+                drawParentChildConnections(context);
+                
+                // Draw explicit connections
+                connections.forEach(conn => {
+                    const fromComp = components.find(c => c.id === conn.from);
+                    const toComp = components.find(c => c.id === conn.to);
+                    if (fromComp && toComp && isComponentVisible(fromComp) && isComponentVisible(toComp)) {
+                        drawConnection(context, fromComp, toComp, conn.style);
+                    }
+                });
+                
+                // Draw components
+                components.forEach(comp => {
+                    if (isComponentVisible(comp)) {
+                        const isHighlighted = (highlightedComponent && highlightedComponent.id === comp.id);
+                        
+                        if (withEffects) {
+                            drawRoundedRect(context, comp.x, comp.y, comp.width, comp.height, 10, comp.color, isHighlighted, comp);
+                        } else {
+                            // Simpler drawing for exports
+                            context.fillStyle = comp.color;
+                            context.fillRect(comp.x, comp.y, comp.width, comp.height);
+                            context.strokeStyle = '#333';
+                            context.strokeRect(comp.x, comp.y, comp.width, comp.height);
+                        }
+                        
+                        context.fillStyle = '#fff';
+                        context.font = 'bold 14px Arial';
+                        context.textAlign = 'center';
+                        context.fillText(comp.name, comp.x + comp.width / 2, comp.y + comp.height / 3);
+                        context.font = '11px Arial';
+                        context.fillText(comp.description, comp.x + comp.width / 2, comp.y + comp.height * 2 / 3);
+                    }
+                });
+            }
+            
+            // Draw minimap
+            function updateMinimap() {
+                minimapCtx.clearRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+                minimapCtx.fillStyle = '#f5f5f5';
+                minimapCtx.fillRect(0, 0, minimapCanvas.width, minimapCanvas.height);
+                
+                // Calculate scale for minimap
+                const diagramWidth = 1200;
+                const diagramHeight = 1000;
+                const minimapScale = Math.min(
+                    minimapCanvas.width / diagramWidth,
+                    minimapCanvas.height / diagramHeight
+                ) * 0.95; // Slightly smaller to create a margin
+                
+                minimapCtx.save();
+                minimapCtx.translate(minimapCanvas.width / 2, minimapCanvas.height / 2);
+                minimapCtx.scale(minimapScale, minimapScale);
+                minimapCtx.translate(-diagramWidth / 2, -diagramHeight / 2);
+                
+                // Draw simplified version of the diagram for the minimap
+                components.forEach(comp => {
+                    if (isComponentVisible(comp)) {
+                        minimapCtx.fillStyle = comp.color;
+                        minimapCtx.fillRect(comp.x, comp.y, comp.width, comp.height);
+                    }
+                });
+                
+                minimapCtx.restore();
+                
+                // Calculate and update viewport indicator
+                const vpX = minimapCanvas.width / 2 - (diagramWidth / 2) * minimapScale + offsetX * scale * minimapScale;
+                const vpY = minimapCanvas.height / 2 - (diagramHeight / 2) * minimapScale + offsetY * scale * minimapScale;
+                const vpWidth = (canvas.width / scale) * minimapScale;
+                const vpHeight = (canvas.height / scale) * minimapScale;
+                
+                viewportIndicator.style.left = `${vpX}px`;
+                viewportIndicator.style.top = `${vpY}px`;
+                viewportIndicator.style.width = `${vpWidth}px`;
+                viewportIndicator.style.height = `${vpHeight}px`;
+            }
+            
+            // Main draw function using requestAnimationFrame for smoothness
+            function draw() {
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                }
+                
+                animationFrameId = requestAnimationFrame(() => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.save();
+                    
+                    // Center the diagram
+                    const diagramWidth = 1200;
+                    const diagramHeight = 1000;
+                    ctx.translate(canvas.width / 2 - (diagramWidth / 2) * scale + offsetX * scale, 
+                                canvas.height / 2 - (diagramHeight / 2) * scale + offsetY * scale);
+                    ctx.scale(scale, scale);
+                    
+                    renderDiagram(ctx, true);
+                    ctx.restore();
+                    
+                    // Update minimap
+                    updateMinimap();
+                });
+            }
+            
+            // Initial draw
+            draw();
+        });
+    </script>
+</body>
+</html>
