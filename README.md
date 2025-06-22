@@ -151,3 +151,5 @@ MedAssess incorporates AI-driven functionalities:
 ## **Conclusion**
 MedAssess is a robust healthcare platform that combines cutting-edge AI-driven assessments, secure provider connections, and essential medical resources. With its strong security measures, responsive UI, and future-ready payment integrations, the platform ensures a reliable and efficient user experience. Further refinements, including optimization of routing structures and third-party API enhancements, will continue to enhance its overall functionality.
 
+
+Built with ❤️ By Hariom Pandit
